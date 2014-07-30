@@ -15,7 +15,11 @@ class udp_frame(object):
 			dispatch_fun = self.PortProtocolDispatch[self.dst]
 			self.udp = dispatch_fun(data[8:])
 		except KeyError:
-			self.udp = data[8:]
+			try:
+				dispatch_fun = self.PortProtocolDispatch[self.src]
+				self.udp = dispatch_fun(data[8:])
+			except KeyError:
+				self.udp = data[8:]
 		except:
 			print "Unknow Error in udp_frame[class]-init. %s\n%s" % (sys.exc_info()[0],sys.exc_info()[1])
 
@@ -27,3 +31,5 @@ class udp_frame(object):
 			return "[UDP%s]: %d -> %d, Size: %d" %( \
 				'?' if not self.Check else self.udp_check(),
 				self.src, self.dst, self.len)
+		else:
+			return "None"
