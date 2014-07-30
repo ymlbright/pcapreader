@@ -1,5 +1,6 @@
 from struct import pack,unpack
 from frame_udp import udp_frame
+import sys
 
 class ipv4_frame(object):
 	ProtocolTable = [
@@ -38,10 +39,16 @@ class ipv4_frame(object):
 			self.TTL = ord(data[8])
 			self.Protocol = ord(data[9])
 			self.HeaderCheck = (data[10:12]==self.heder_check(data))
-			self.src = data[12:16]
+			self.src = data[12:16] 
 			self.dst = data[16:20]
 			self.Option = data[20:self.IHL*4]
-			self.ipv4 = data[self.IHL*4:]
+			try:
+				dispatch_fun = self.ProtocolDispatchTable[self.Protocol]
+				self.ipv4 = dispatch_fun(data[self.IHL*4:])
+			except KeyError:
+				self.ipv4 = data[self.IHL*4:]
+			except:
+				print "Unknow Error in ipv4_frame[class]-init. %s\n%s" % (sys.exc_info()[0],sys.exc_info()[1])
 		else:
 			raise TypeError
 
@@ -55,7 +62,7 @@ class ipv4_frame(object):
 
 	def __repr__(self):
 		if self.len:
-			return "Ipv4[%s]: %d.%d.%d.%d -> %d.%d.%d.%d, Protocol: %s(%d), Size: %d" % ( \
+			return "[Ipv4%s]: %d.%d.%d.%d -> %d.%d.%d.%d, Protocol: %s(%d), Size: %d" % ( \
 				'.' if self.HeaderCheck else '!',
 				ord(self.src[0]),ord(self.src[1]),ord(self.src[2]),ord(self.src[3]),
 				ord(self.dst[0]),ord(self.dst[1]),ord(self.dst[2]),ord(self.dst[3]),
@@ -68,5 +75,5 @@ if __name__ =="__main__":
 	test = "450000620001000040115b830a0a0a960a000068dbcb0035004e1f3fb61a01000001000000000000296161616161327161616161616161616161616161616161612d303031653333653964656362666362340662616467757903636f6d0000100001"
 	test = test.decode('hex')
 	t = ipv4_frame(test)
-	print t
+	print t.ipv4
 

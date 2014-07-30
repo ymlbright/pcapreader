@@ -92,4 +92,8 @@ class Pcap(object):
 			return "No file opened."
 
 t = Pcap("74db9d6b62579fea4525d40e6848433f-net03.pcap")
+print t
 print t[100]
+print t[100].eth 
+print t[100].eth.ipv4
+print t[100].eth.ipv4.udp
